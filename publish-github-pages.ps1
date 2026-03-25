@@ -1,9 +1,9 @@
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-
 param(
   [string]$RepoName = "blessing-love-notes"
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 $repoPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $git = "C:\Program Files\Git\bin\git.exe"
