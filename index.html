@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open When You Miss Me</title>
+  <meta name="theme-color" content="#d05b3d" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="shortcut icon" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" href="assets/icon-192.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-cream: #fff8ef;
+      --bg-warm: #ffe4d4;
+      --bg-soft-orange: #ffc7a8;
+      --text-main: #2b1f1b;
+      --text-muted: #6d4c3d;
+      --card-bg: rgba(255, 255, 255, 0.76);
+      --accent-red: #d05b3d;
+      --accent-teal: #2b8d87;
+      --shadow: 0 18px 50px rgba(56, 20, 9, 0.15);
+      --radius-lg: 26px;
+      --radius-md: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.85), transparent 35%),
+        radial-gradient(circle at 84% 20%, rgba(255, 238, 217, 0.85), transparent 42%),
+        linear-gradient(150deg, var(--bg-cream), var(--bg-warm) 42%, var(--bg-soft-orange));
+    }
+
+    body.app-locked .page {
+      filter: blur(8px);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .grain::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.15;
+      background-image: radial-gradient(#9d674f 0.5px, transparent 0.5px);
+      background-size: 5px 5px;
+      mix-blend-mode: multiply;
+    }
+
+    .page {
+      width: min(1050px, 92vw);
+      margin: 32px auto 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(32, 14, 9, 0.45);
+      backdrop-filter: blur(5px);
+      transition: opacity 180ms ease;
+    }
+
+    body:not(.app-locked) .lock-screen {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lock-card {
+      width: min(460px, 100%);
+      background: #fff7ef;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 18px 50px rgba(24, 10, 6, 0.3);
+    }
+
+    .lock-card h2 {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(1.6rem, 5vw, 2rem);
+      line-height: 1.1;
+    }
+
+    .lock-card p {
+      margin: 10px 0 0;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .lock-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .lock-actions input {
+      flex: 1 1 160px;
+      min-width: 140px;
+      border: 1px solid rgba(66, 41, 31, 0.2);
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px 11px;
+      font: inherit;
+    }
+
+    .lock-actions button {
+      border: none;
+      border-radius: 10px;
+      background: var(--accent-red);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .lock-tip {
+      min-height: 1.4em;
+      font-size: 0.9rem;
+    }
+
+    .hero {
+      border-radius: var(--radius-lg);
+      padding: clamp(22px, 5vw, 46px);
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.63));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(4px);
+      animation: hero-rise 600ms ease;
+    }
+
+    .eyebrow {
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent-teal);
+      font-size: 0.83rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(2rem, 7vw, 3.5rem);
+      line-height: 1.05;
+      max-width: 14ch;
+    }
+
+    .hero p {
+      margin: 16px 0 0;
+      font-size: clamp(0.98rem, 2.8vw, 1.18rem);
+      color: var(--text-muted);
+      max-width: 58ch;
+      line-height: 1.55;
+    }
+
+    .meta-row {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(43, 141, 135, 0.12);
+      color: #0f625d;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .time-love {
+      margin-top: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(208, 91, 61, 0.2);
+      padding: 12px 13px;
+      color: #6f3f31;
+      font-size: 0.93rem;
+      line-height: 1.45;
+      min-height: 3.1em;
+    }
+
+    .cards {
+      margin-top: clamp(18px, 5vw, 28px);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: var(--radius-md);
+      background: var(--card-bg);
+      box-shadow: 0 12px 30px rgba(62, 22, 7, 0.11);
+      padding: 17px 16px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transform: translateY(18px);
+      opacity: 0;
+      transition: transform 350ms ease, opacity 350ms ease;
+    }
+
+    .card.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .card h2 {
+      margin: 0 0 7px;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.22rem;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.4;
+      font-size: 0.94rem;
+    }
+
+    .card button {
+      margin-top: 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent-red);
+      color: #fff;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 150ms ease, opacity 150ms ease;
+    }
+
+    .card button:hover,
+    .card button:focus-visible {
+      transform: translateY(-2px);
+      opacity: 0.93;
+      outline: none;
+    }
+
+    .daily-note {
+      margin-top: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 10px 26px rgba(62, 22, 7, 0.09);
+      padding: 16px;
+    }
+
+    .daily-note h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .daily-note p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.45;
+      min-height: 2.2em;
+    }
+
+    .daily-note button {
+      margin-top: 10px;
+      border: 1px solid rgba(43, 141, 135, 0.35);
+      background: rgba(43, 141, 135, 0.1);
+      color: #105e59;
+      border-radius: 10px;
+      padding: 8px 11px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .daily-actions {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .daily-note .reaction-btn {
+      border-color: rgba(208, 91, 61, 0.34);
+      background: rgba(208, 91, 61, 0.11);
+      color: #943f2a;
+      font-weight: 700;
+    }
+
+    .smile-count {
+      margin-top: 8px;
+      min-height: 1.3em;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .scheduled-notes {
+      margin-top: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 10px 26px rgba(62, 22, 7, 0.09);
+      padding: 16px;
+    }
+
+    .scheduled-notes h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .scheduled-notes p {
+      margin: 8px 0 0;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .unlock-grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+
+    .unlock-card {
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(208, 91, 61, 0.25);
+      background: rgba(255, 248, 242, 0.86);
+      min-height: 118px;
+    }
+
+    .unlock-card h4 {
+      margin: 0;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      color: #8c412d;
+    }
+
+    .unlock-card p {
+      margin: 7px 0 0;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--text-main);
+    }
+
+    .unlock-card.locked {
+      background: rgba(235, 222, 214, 0.6);
+      border-color: rgba(109, 76, 61, 0.25);
+    }
+
+    .unlock-card.locked p {
+      color: #805849;
+    }
+
+    .unlock-next {
+      margin-top: 10px;
+      min-height: 1.3em;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .love-quiz {
+      margin-top: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 10px 26px rgba(62, 22, 7, 0.09);
+      padding: 16px;
+    }
+
+    .love-quiz h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .love-quiz p {
+      margin: 8px 0 0;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .quiz-items {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .quiz-item {
+      background: rgba(255, 251, 247, 0.86);
+      border-radius: 12px;
+      border: 1px solid rgba(208, 91, 61, 0.2);
+      padding: 10px;
+    }
+
+    .quiz-item h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #8d4b34;
+    }
+
+    .quiz-options {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quiz-options label {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #593d33;
+      cursor: pointer;
+    }
+
+    .quiz-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .quiz-actions button {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent-red);
+      color: #fff;
+    }
+
+    .quiz-actions .ghost-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #5f4033;
+      border: 1px solid rgba(66, 41, 31, 0.25);
+    }
+
+    .quiz-result {
+      margin-top: 10px;
+      min-height: 2.2em;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .voice-notes,
+    .share-online {
+      margin-top: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 10px 26px rgba(62, 22, 7, 0.09);
+      padding: 16px;
+    }
+
+    .voice-notes h3,
+    .share-online h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .voice-notes p,
+    .share-online p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .voice-buttons {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .voice-buttons button {
+      border: 1px solid rgba(208, 91, 61, 0.34);
+      background: rgba(208, 91, 61, 0.1);
+      color: #953f2a;
+      border-radius: 10px;
+      padding: 8px 11px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .voice-player {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .voice-status {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      min-height: 1.4em;
+    }
+
+    .share-grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .code-chip {
+      display: inline-block;
+      width: fit-content;
+      background: rgba(43, 141, 135, 0.12);
+      border: 1px solid rgba(43, 141, 135, 0.32);
+      border-radius: 9px;
+      padding: 7px 10px;
+      font-size: 0.86rem;
+      color: #0f625d;
+    }
+
+    .share-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .install-tip {
+      margin-top: 8px;
+      min-height: 1.3em;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .ghost-btn {
+      border: 1px solid rgba(66, 41, 31, 0.25);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px 12px;
+      font: inherit;
+      color: #5f4033;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      width: 8px;
+      height: 12px;
+      border-radius: 3px;
+      z-index: 200;
+      pointer-events: none;
+      animation: confetti-pop 950ms ease-out forwards;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(35, 17, 11, 0.55);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+      z-index: 50;
+    }
+
+    .modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-inner {
+      width: min(640px, 100%);
+      border-radius: var(--radius-lg);
+      background: #fff8f2;
+      box-shadow: 0 20px 55px rgba(21, 10, 6, 0.3);
+      padding: clamp(18px, 4vw, 30px);
+      transform: translateY(10px);
+      transition: transform 220ms ease;
+    }
+
+    .modal.open .modal-inner {
+      transform: translateY(0);
+    }
+
+    .modal-inner h4 {
+      margin: 0;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(1.4rem, 4.7vw, 1.9rem);
+    }
+
+    .modal-inner .note-body {
+      margin-top: 11px;
+      color: var(--text-main);
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+
+    .modal-inner .close-row {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .modal-inner small {
+      color: var(--text-muted);
+    }
+
+    .modal-inner button {
+      border: none;
+      border-radius: 11px;
+      background: var(--accent-teal);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      padding: 9px 14px;
+      cursor: pointer;
+    }
+
+    @keyframes hero-rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes confetti-pop {
+      from {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+      }
+      to {
+        transform: translate(var(--tx), var(--ty)) rotate(var(--spin));
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        margin-top: 18px;
+      }
+
+      .hero {
+        border-radius: 22px;
+      }
+
+      .lock-actions {
+        flex-direction: column;
+      }
+
+      .lock-actions button,
+      .lock-actions input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="app-locked">
+  <div class="grain"></div>
+  <section class="lock-screen" id="lock-screen" aria-hidden="false">
+    <div class="lock-card">
+      <p class="eyebrow">Private Space</p>
+      <h2>For Blessing Only</h2>
+      <p>Enter your PIN to open your love notes.</p>
+      <div class="lock-actions">
+        <input id="pin-input" type="password" inputmode="text" maxlength="40" placeholder="Enter PIN" />
+        <button id="unlock-btn" type="button">Unlock</button>
+      </div>
+      <p class="lock-tip" id="lock-tip">Tip: set your preferred PIN in the script.</p>
+    </div>
+  </section>
+
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">For BLESSING</p>
+      <h1>Blessing, Open This Whenever You Miss Me</h1>
+      <p>
+        Blessing, this is your pocket version of me. Pick any card, read it, and
+        remember: you are deeply loved, always appreciated, and never alone.
+      </p>
+      <div class="meta-row">
+        <div class="pill" id="clock-pill">Thinking of you right now</div>
+        <div class="pill">Made with care, just for you</div>
+      </div>
+      <div class="time-love" id="time-love-message"></div>
+    </section>
+
+    <section class="cards" id="cards"></section>
+
+    <section class="voice-notes">
+      <h3>Hear My Voice</h3>
+      <p>Tap any button to play a voice note for Blessing.</p>
+      <div class="voice-buttons" id="voice-buttons"></div>
+      <audio id="voice-player" class="voice-player" controls preload="metadata"></audio>
+      <p class="voice-status" id="voice-status">Add MP3 files to `assets/` to activate your recordings.</p>
+    </section>
+
+    <section class="daily-note">
+      <h3>Extra Sweet Message</h3>
+      <p id="daily-text">I like you more than yesterday and less than tomorrow.</p>
+      <div class="daily-actions">
+        <button id="shuffle-note" type="button">Give me another one</button>
+        <button id="smile-btn" class="reaction-btn" type="button">I Smiled</button>
+      </div>
+      <p class="smile-count" id="smile-count"></p>
+    </section>
+
+    <section class="scheduled-notes">
+      <h3>Daily Love Unlock</h3>
+      <p id="unlock-progress">One new message unlocks each day.</p>
+      <div class="unlock-grid" id="unlock-grid"></div>
+      <p class="unlock-next" id="unlock-next"></p>
+    </section>
+
+    <section class="love-quiz">
+      <h3>Love Quiz</h3>
+      <p>Pick your answers and see your romantic score.</p>
+      <div class="quiz-items" id="quiz-items"></div>
+      <div class="quiz-actions">
+        <button id="quiz-submit-btn" type="button">Show Result</button>
+        <button id="quiz-reset-btn" class="ghost-btn" type="button">Reset Quiz</button>
+      </div>
+      <p class="quiz-result" id="quiz-result"></p>
+    </section>
+
+    <section class="share-online">
+      <h3>Share Online</h3>
+      <p>This project is ready for instant hosting.</p>
+      <div class="share-grid">
+        <span class="code-chip">Fastest: drag this folder to Netlify Drop</span>
+        <span class="code-chip">Guide: follow steps in DEPLOY.md</span>
+      </div>
+      <div class="share-actions">
+        <button type="button" id="install-app-btn" class="ghost-btn">Install App</button>
+        <button type="button" id="lock-again-btn" class="ghost-btn">Lock Again</button>
+      </div>
+      <p class="install-tip" id="install-tip"></p>
+    </section>
+  </main>
+
+  <div class="modal" id="note-modal" aria-hidden="true">
+    <div class="modal-inner" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h4 id="modal-title"></h4>
+      <div class="note-body" id="modal-body"></div>
+      <div class="close-row">
+        <small id="modal-footnote"></small>
+        <button type="button" id="close-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bestFriendName = "BLESSING";
+    const sitePin = "love you more";
+    const unlockDurationMs = 24 * 60 * 60 * 1000;
+    const storageKeys = {
+      unlockUntil: "blessing_unlock_until",
+      smileCount: "blessing_smile_count",
+      dailyStart: "blessing_daily_start"
+    };
+    let deferredInstallPrompt = null;
+
+    const openWhenNotes = [
+      {
+        title: "Open when you miss me",
+        teaser: "Even when I am far, my heart stays wrapped around you.",
+        body:
+          "My love, close your eyes for a second.\n\nIf I were with you right now, I would pull you close, kiss your forehead, and remind you that you are the best part of my day.\n\nDistance can stretch the road between us, but it cannot weaken the way I love you, Blessing.",
+        footnote: "You are my favorite hello and my hardest goodnight."
+      },
+      {
+        title: "Open when you are sad",
+        teaser: "Let me hold your heart until it feels lighter again.",
+        body:
+          "I know today feels heavy, babe, but please hear me.\n\nNo sad day can erase how beautiful, strong, and precious you are to me.\n\nLean on me in this moment. You never have to pretend with me. I am here, loving you through every mood.",
+        footnote: "My arms are always open for you, Blessing."
+      },
+      {
+        title: "Open when you need confidence",
+        teaser: "You carry a beauty and strength that turns heads and hearts.",
+        body:
+          "Blessing, look at yourself through my eyes.\n\nYou are brilliant, elegant, and full of grace. The way you move through life makes me fall for you again and again.\n\nWalk into every room like the woman I know you are: unforgettable.",
+        footnote: "You are the dream I get to love in real life."
+      },
+      {
+        title: "Open when you cannot sleep",
+        teaser: "Borrow my heartbeat and drift off in my love.",
+        body:
+          "Come closer in your mind and rest your head on my chest.\n\nBreathe with me: inhale for 4, hold for 4, exhale for 6.\n\nYou are safe, adored, and deeply loved. Let the night hold you gently, my queen.",
+        footnote: "Sleep softly, my love. I am kissing you goodnight from here."
+      },
+      {
+        title: "Open when you are overthinking",
+        teaser: "Pause, come to me, and let your heart settle.",
+        body:
+          "I know your mind races when you care this much.\n\nPut your hand on your chest and remember: you are loved right now, not later, not someday, right now.\n\nTake one small step, then another. I will be here, cheering for you with all my heart.",
+        footnote: "With love, everything feels possible."
+      },
+      {
+        title: "Open when you want to smile",
+        teaser: "A romantic smile refill made only for you.",
+        body:
+          "Fun fact: you are still my biggest soft spot.\n\nYour smile is dangerous because it steals my attention every single time.\n\nSo give me that smile now, babe. I can feel it from here, and it still melts me like the first day.",
+        footnote: "Your smile is my favorite place to live."
+      }
+    ];
+
+    const voiceNotes = [
+      { label: "Play Voice Note 1", src: "assets/voice-note-1.mp3", caption: "Hey my love, I just wanted your voice close to me too." },
+      { label: "Play Voice Note 2", src: "assets/voice-note-2.mp3", caption: "A little love letter in audio, just for you." },
+      { label: "Play Voice Note 3", src: "assets/voice-note-3.mp3", caption: "Close your eyes and imagine me holding you tight." }
+    ];
+
+    const extraSweetLines = [
+      "Blessing, my heart still chooses you first every day.",
+      "I love you in the quiet moments and the loud ones too.",
+      "If you miss me, place your hand on your chest. I am there.",
+      "You are my answered prayer in human form.",
+      "Loving you feels like home, every single time.",
+      "You and me, always, my love."
+    ];
+
+    const scheduledLoveNotes = [
+      "Day 1: You are the first person I think of in the morning and the last person on my mind at night.",
+      "Day 2: If I had to choose again, I would still choose you in every lifetime.",
+      "Day 3: Your voice is my favorite comfort sound.",
+      "Day 4: Even silence feels romantic when I imagine it with you.",
+      "Day 5: Loving you has made me softer, stronger, and happier.",
+      "Day 6: You are not just special to me. You are home to me.",
+      "Day 7: You make ordinary days feel like anniversaries.",
+      "Day 8: I do not need perfect moments, I just need moments with you.",
+      "Day 9: Thank you for being the sweetest part of my story.",
+      "Day 10: My heart is calm whenever I remember you are mine."
+    ];
+
+    const timeLoveMessages = {
+      morning: [
+        "Good morning, my love. I hope your day starts soft and ends with a smile.",
+        "Morning, Blessing. You are my first happy thought today.",
+        "Rise and shine, babe. My heart still says love you more."
+      ],
+      afternoon: [
+        "Afternoon check-in: I still miss you and I still choose you.",
+        "Hope your day is kind to you, my queen. I am rooting for you from here.",
+        "Midday reminder: you are loved deeply, not lightly."
+      ],
+      evening: [
+        "Good evening, my love. I wish I was holding you right now.",
+        "Evening looks better when I imagine it with you beside me.",
+        "Sunset note for Blessing: you are the calm in my day."
+      ],
+      night: [
+        "Good night, babe. Sleep knowing you are deeply loved.",
+        "Tonight, I am sending you a forehead kiss from afar.",
+        "Close your eyes, my love. My heart is still with you."
+      ]
+    };
+
+    const loveQuizQuestions = [
+      {
+        question: "What is the cutest way to get a hug from me?",
+        options: [
+          { label: "Say my name softly", points: 2 },
+          { label: "Look at me and smile", points: 3 },
+          { label: "Just open your arms", points: 1 }
+        ]
+      },
+      {
+        question: "Where should our perfect date be?",
+        options: [
+          { label: "Quiet dinner", points: 2 },
+          { label: "Sunset walk", points: 3 },
+          { label: "Movie night in", points: 1 }
+        ]
+      },
+      {
+        question: "What does 'love you more' mean here?",
+        options: [
+          { label: "Today only", points: 1 },
+          { label: "Always and forever", points: 3 },
+          { label: "When we are close", points: 2 }
+        ]
+      }
+    ];
+
+    const cardsWrap = document.getElementById("cards");
+    const modal = document.getElementById("note-modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalBody = document.getElementById("modal-body");
+    const modalFootnote = document.getElementById("modal-footnote");
+    const closeModalBtn = document.getElementById("close-modal");
+    const dailyText = document.getElementById("daily-text");
+    const shuffleNoteBtn = document.getElementById("shuffle-note");
+    const clockPill = document.getElementById("clock-pill");
+    const voiceButtons = document.getElementById("voice-buttons");
+    const voicePlayer = document.getElementById("voice-player");
+    const voiceStatus = document.getElementById("voice-status");
+    const smileBtn = document.getElementById("smile-btn");
+    const smileCount = document.getElementById("smile-count");
+    const unlockGrid = document.getElementById("unlock-grid");
+    const unlockProgress = document.getElementById("unlock-progress");
+    const unlockNext = document.getElementById("unlock-next");
+    const timeLoveMessage = document.getElementById("time-love-message");
+    const quizItems = document.getElementById("quiz-items");
+    const quizSubmitBtn = document.getElementById("quiz-submit-btn");
+    const quizResetBtn = document.getElementById("quiz-reset-btn");
+    const quizResult = document.getElementById("quiz-result");
+    const installAppBtn = document.getElementById("install-app-btn");
+    const installTip = document.getElementById("install-tip");
+    const lockScreen = document.getElementById("lock-screen");
+    const pinInput = document.getElementById("pin-input");
+    const unlockBtn = document.getElementById("unlock-btn");
+    const lockTip = document.getElementById("lock-tip");
+    const lockAgainBtn = document.getElementById("lock-again-btn");
+
+    function readStore(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeStore(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        return;
+      }
+    }
+
+    function getDateKey(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function dateFromKey(key) {
+      const [y, m, d] = key.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function dayDifference(startDate, endDate) {
+      const startUtc = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const endUtc = Date.UTC(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return Math.floor((endUtc - startUtc) / 86400000);
+    }
+
+    function addDays(date, days) {
+      const next = new Date(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    }
+
+    function getDailyStartKey() {
+      let startKey = readStore(storageKeys.dailyStart);
+      if (!startKey) {
+        startKey = getDateKey();
+        writeStore(storageKeys.dailyStart, startKey);
+      }
+      return startKey;
+    }
+
+    function getTimePeriod(date = new Date()) {
+      const hour = date.getHours();
+      if (hour >= 5 && hour < 12) return "morning";
+      if (hour >= 12 && hour < 17) return "afternoon";
+      if (hour >= 17 && hour < 22) return "evening";
+      return "night";
+    }
+
+    function getDailyIndex(seedSize) {
+      const now = new Date();
+      const utcDayNumber = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+      return utcDayNumber % seedSize;
+    }
+
+    function renderTimeLoveMessage() {
+      const period = getTimePeriod();
+      const lines = timeLoveMessages[period];
+      const index = getDailyIndex(lines.length);
+      timeLoveMessage.textContent = lines[index];
+    }
+
+    function renderCards() {
+      openWhenNotes.forEach((note, index) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.style.transitionDelay = `${index * 60}ms`;
+        article.innerHTML = `
+          <div>
+            <h2>${note.title}</h2>
+            <p>${note.teaser}</p>
+          </div>
+          <button type="button">Open</button>
+        `;
+
+        article.querySelector("button").addEventListener("click", () => openNote(note));
+        cardsWrap.appendChild(article);
+      });
+    }
+
+    function renderVoiceButtons() {
+      voiceNotes.forEach((note, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = note.label;
+        button.addEventListener("click", async () => {
+          voicePlayer.src = note.src;
+          voiceStatus.textContent = note.caption;
+          try {
+            await voicePlayer.play();
+          } catch (error) {
+            voiceStatus.textContent = `Tap play on the audio bar for ${note.label}.`;
+          }
+        });
+
+        voiceButtons.appendChild(button);
+      });
+
+      voicePlayer.addEventListener("error", () => {
+        voiceStatus.textContent = "One or more voice files are missing. Add them to assets/ and reload.";
+      });
+    }
+
+    function renderScheduledNotes() {
+      const startDate = dateFromKey(getDailyStartKey());
+      const today = dateFromKey(getDateKey());
+      const unlockedCount = Math.min(scheduledLoveNotes.length, Math.max(1, dayDifference(startDate, today) + 1));
+
+      unlockGrid.innerHTML = "";
+      scheduledLoveNotes.forEach((note, index) => {
+        const dayLabel = `Day ${index + 1}`;
+        const isUnlocked = index < unlockedCount;
+        const card = document.createElement("article");
+        card.className = `unlock-card ${isUnlocked ? "unlocked" : "locked"}`;
+
+        if (isUnlocked) {
+          card.innerHTML = `<h4>${dayLabel}</h4><p>${note}</p>`;
+        } else {
+          const daysLeft = index - unlockedCount + 1;
+          const dayWord = daysLeft === 1 ? "day" : "days";
+          card.innerHTML = `<h4>${dayLabel}</h4><p>Unlocks in ${daysLeft} ${dayWord}.</p>`;
+        }
+
+        unlockGrid.appendChild(card);
+      });
+
+      unlockProgress.textContent = `${unlockedCount} of ${scheduledLoveNotes.length} daily notes unlocked.`;
+
+      if (unlockedCount >= scheduledLoveNotes.length) {
+        unlockNext.textContent = "Every daily love note is now unlocked.";
+        return;
+      }
+
+      const nextUnlockDate = addDays(startDate, unlockedCount);
+      const msRemaining = Math.max(1, nextUnlockDate.getTime() - Date.now());
+      const hoursRemaining = Math.max(1, Math.ceil(msRemaining / 3600000));
+      const hourWord = hoursRemaining === 1 ? "hour" : "hours";
+      unlockNext.textContent = `Next note unlocks in about ${hoursRemaining} ${hourWord}.`;
+    }
+
+    function renderLoveQuiz() {
+      quizItems.innerHTML = "";
+      loveQuizQuestions.forEach((item, index) => {
+        const wrapper = document.createElement("article");
+        wrapper.className = "quiz-item";
+        const optionsHtml = item.options
+          .map(
+            (option, optionIndex) =>
+              `<label><input type="radio" name="quiz-q-${index}" value="${option.points}" data-option-index="${optionIndex}" /> ${option.label}</label>`
+          )
+          .join("");
+        wrapper.innerHTML = `<h4>Q${index + 1}. ${item.question}</h4><div class="quiz-options">${optionsHtml}</div>`;
+        quizItems.appendChild(wrapper);
+      });
+    }
+
+    function getQuizScore() {
+      let score = 0;
+      let answered = 0;
+      loveQuizQuestions.forEach((_, index) => {
+        const selected = document.querySelector(`input[name="quiz-q-${index}"]:checked`);
+        if (!selected) return;
+        score += Number(selected.value);
+        answered += 1;
+      });
+      return { score, answered, total: loveQuizQuestions.length };
+    }
+
+    function showQuizResult() {
+      const { score, answered, total } = getQuizScore();
+      if (answered < total) {
+        quizResult.textContent = "Answer all questions first, my love.";
+        return;
+      }
+
+      if (score >= 8) {
+        quizResult.textContent = "Perfect match. You know my heart so well, Blessing.";
+        launchConfettiFrom(quizSubmitBtn);
+      } else if (score >= 6) {
+        quizResult.textContent = "Lovely score. You and I are still a sweet love story.";
+      } else {
+        quizResult.textContent = "Still cute. Retake it and let me spoil you with a higher score.";
+      }
+    }
+
+    function resetQuiz() {
+      quizItems.querySelectorAll("input[type='radio']").forEach((input) => {
+        input.checked = false;
+      });
+      quizResult.textContent = "";
+    }
+
+    function openNote(note) {
+      modalTitle.textContent = note.title;
+      modalBody.textContent = note.body;
+      modalFootnote.textContent = note.footnote;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      closeModalBtn.focus();
+    }
+
+    function closeNote() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function getRandomLine() {
+      return extraSweetLines[Math.floor(Math.random() * extraSweetLines.length)];
+    }
+
+    function getSmileCount() {
+      const count = Number(readStore(storageKeys.smileCount) || "0");
+      return Number.isFinite(count) && count >= 0 ? count : 0;
+    }
+
+    function renderSmileCount() {
+      const count = getSmileCount();
+      const suffix = count === 1 ? "" : "s";
+      smileCount.textContent = `${count} smile${suffix} sent to you so far.`;
+    }
+
+    function launchConfettiFrom(buttonElement) {
+      const colors = ["#d05b3d", "#2b8d87", "#f7b267", "#f28482", "#8ac926"];
+      const rect = buttonElement.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+
+      for (let i = 0; i < 24; i += 1) {
+        const piece = document.createElement("span");
+        const angle = (Math.PI * 2 * i) / 24 + Math.random() * 0.25;
+        const travel = 60 + Math.random() * 120;
+        const x = Math.cos(angle) * travel;
+        const y = Math.sin(angle) * travel + 75;
+        const spin = `${Math.round(280 + Math.random() * 260)}deg`;
+
+        piece.className = "confetti-piece";
+        piece.style.left = `${originX}px`;
+        piece.style.top = `${originY}px`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.setProperty("--tx", `${Math.round(x)}px`);
+        piece.style.setProperty("--ty", `${Math.round(y)}px`);
+        piece.style.setProperty("--spin", spin);
+
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 980);
+      }
+    }
+
+    function registerSmile() {
+      const nextCount = getSmileCount() + 1;
+      writeStore(storageKeys.smileCount, String(nextCount));
+      renderSmileCount();
+      launchConfettiFrom(smileBtn);
+    }
+
+    function setAppLocked(shouldLock) {
+      document.body.classList.toggle("app-locked", shouldLock);
+      lockScreen.setAttribute("aria-hidden", String(!shouldLock));
+
+      if (shouldLock) {
+        pinInput.value = "";
+        pinInput.focus();
+      }
+    }
+
+    function unlockApp() {
+      const inputPin = pinInput.value.trim();
+      if (inputPin.replace(/\s+/g, " ").toLowerCase() === sitePin.replace(/\s+/g, " ").toLowerCase()) {
+        writeStore(storageKeys.unlockUntil, String(Date.now() + unlockDurationMs));
+        lockTip.textContent = "Unlocked. Welcome, Blessing.";
+        setAppLocked(false);
+        return;
+      }
+
+      lockTip.textContent = "Wrong PIN. Try again, my love.";
+      pinInput.value = "";
+      pinInput.focus();
+    }
+
+    function lockAgain() {
+      writeStore(storageKeys.unlockUntil, "0");
+      lockTip.textContent = "Enter PIN to unlock your love notes.";
+      setAppLocked(true);
+    }
+
+    function initializeLockState() {
+      const unlockUntil = Number(readStore(storageKeys.unlockUntil) || "0");
+      setAppLocked(!(unlockUntil > Date.now()));
+    }
+
+    function updateInstallTip(message) {
+      installTip.textContent = message;
+    }
+
+    function initializeInstallPrompt() {
+      installAppBtn.style.display = "none";
+      updateInstallTip("Install this as an app after hosting it online (HTTPS).");
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        installAppBtn.style.display = "inline-block";
+        updateInstallTip("Install is ready. Tap Install App.");
+      });
+
+      window.addEventListener("appinstalled", () => {
+        deferredInstallPrompt = null;
+        installAppBtn.style.display = "none";
+        updateInstallTip("App installed successfully. Love goes offline now too.");
+      });
+    }
+
+    async function handleInstallClick() {
+      if (!deferredInstallPrompt) {
+        updateInstallTip("If Install App does not appear, use browser menu > Add to Home Screen.");
+        return;
+      }
+
+      deferredInstallPrompt.prompt();
+      const outcome = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+
+      if (outcome.outcome === "accepted") {
+        installAppBtn.style.display = "none";
+        updateInstallTip("Installing app...");
+      } else {
+        updateInstallTip("Install canceled. You can try again anytime.");
+      }
+    }
+
+    async function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+      try {
+        await navigator.serviceWorker.register("service-worker.js");
+      } catch (error) {
+        updateInstallTip("Offline mode unavailable here. It will work once hosted.");
+      }
+    }
+
+    function updateClockPill() {
+      const now = new Date();
+      const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      clockPill.textContent = `Thinking of you right now, ${bestFriendName} - ${time}`;
+    }
+
+    function animateCardsIn() {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+
+      document.querySelectorAll(".card").forEach((card) => observer.observe(card));
+    }
+
+    closeModalBtn.addEventListener("click", closeNote);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeNote();
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modal.classList.contains("open")) {
+        closeNote();
+      }
+    });
+
+    shuffleNoteBtn.addEventListener("click", () => {
+      dailyText.textContent = getRandomLine();
+    });
+    smileBtn.addEventListener("click", registerSmile);
+    quizSubmitBtn.addEventListener("click", showQuizResult);
+    quizResetBtn.addEventListener("click", resetQuiz);
+    installAppBtn.addEventListener("click", handleInstallClick);
+    unlockBtn.addEventListener("click", unlockApp);
+    pinInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") unlockApp();
+    });
+    lockAgainBtn.addEventListener("click", lockAgain);
+
+    renderCards();
+    renderVoiceButtons();
+    renderScheduledNotes();
+    renderLoveQuiz();
+    renderTimeLoveMessage();
+    renderSmileCount();
+    animateCardsIn();
+    updateClockPill();
+    initializeLockState();
+    initializeInstallPrompt();
+    registerServiceWorker();
+    setInterval(updateClockPill, 60000);
+    setInterval(renderTimeLoveMessage, 60000);
+    setInterval(renderScheduledNotes, 60000);
+  </script>
+</body>
+</html>
