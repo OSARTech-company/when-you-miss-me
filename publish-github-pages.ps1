@@ -13,8 +13,12 @@ if (-not (Test-Path (Join-Path $repoPath ".git"))) {
   throw "No local .git repository found in $repoPath"
 }
 
+$oldEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 & $gh auth status *> $null
-if ($LASTEXITCODE -ne 0) {
+$authExitCode = $LASTEXITCODE
+$ErrorActionPreference = $oldEap
+if ($authExitCode -ne 0) {
   throw "GitHub auth missing. Run: gh auth login --web --git-protocol https --skip-ssh-key"
 }
 
