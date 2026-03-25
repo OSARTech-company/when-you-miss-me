@@ -43,6 +43,16 @@
 5. Your link will be:
    - `https://<your-username>.github.io/<repo-name>/`
 
+## Option 4: Render with Git Push (no upload)
+1. Keep `render.yaml` in repo root (already added).
+2. In Render, choose `New -> Blueprint` and select this GitHub repo.
+3. Render will create a static site using:
+   - `runtime: static`
+   - `buildCommand: echo "No build step"`
+   - `staticPublishPath: .`
+4. Every push to `main` auto-deploys.
+5. If you previously created a failing Python Web Service, delete it and use this Blueprint static service instead.
+
 ## Before sharing
 1. Add your real photos and voice notes in `assets/`.
 2. Open `index.html` locally once to confirm everything loads.

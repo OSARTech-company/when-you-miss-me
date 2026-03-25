@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: when-you-miss-me
+    runtime: static
+    branch: main
+    buildCommand: echo "No build step"
+    staticPublishPath: .
