@@ -1,7 +1,7 @@
 services:
   - type: web
     name: when-you-miss-me
-    runtime: static
+    runtime: python
     branch: main
-    buildCommand: echo "No build step"
-    staticPublishPath: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
