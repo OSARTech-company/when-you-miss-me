@@ -43,12 +43,6 @@
         linear-gradient(150deg, var(--bg-cream), var(--bg-warm) 42%, var(--bg-soft-orange));
     }
 
-    body.app-locked .page {
-      filter: blur(8px);
-      pointer-events: none;
-      user-select: none;
-    }
-
     .grain::before {
       content: "";
       position: fixed;
@@ -65,77 +59,6 @@
       margin: 32px auto 40px;
       position: relative;
       z-index: 1;
-    }
-
-    .lock-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 120;
-      display: grid;
-      place-items: center;
-      padding: 16px;
-      background: rgba(32, 14, 9, 0.45);
-      backdrop-filter: blur(5px);
-      transition: opacity 180ms ease;
-    }
-
-    body:not(.app-locked) .lock-screen {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .lock-card {
-      width: min(460px, 100%);
-      background: #fff7ef;
-      border-radius: 22px;
-      padding: 20px;
-      box-shadow: 0 18px 50px rgba(24, 10, 6, 0.3);
-    }
-
-    .lock-card h2 {
-      margin: 0;
-      font-family: "Fraunces", Georgia, serif;
-      font-size: clamp(1.6rem, 5vw, 2rem);
-      line-height: 1.1;
-    }
-
-    .lock-card p {
-      margin: 10px 0 0;
-      color: var(--text-muted);
-      line-height: 1.45;
-    }
-
-    .lock-actions {
-      margin-top: 12px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .lock-actions input {
-      flex: 1 1 160px;
-      min-width: 140px;
-      border: 1px solid rgba(66, 41, 31, 0.2);
-      border-radius: 10px;
-      background: #fff;
-      padding: 10px 11px;
-      font: inherit;
-    }
-
-    .lock-actions button {
-      border: none;
-      border-radius: 10px;
-      background: var(--accent-red);
-      color: #fff;
-      font: inherit;
-      font-weight: 700;
-      padding: 10px 14px;
-      cursor: pointer;
-    }
-
-    .lock-tip {
-      min-height: 1.4em;
-      font-size: 0.9rem;
     }
 
     .hero {
@@ -673,31 +596,11 @@
         border-radius: 22px;
       }
 
-      .lock-actions {
-        flex-direction: column;
-      }
-
-      .lock-actions button,
-      .lock-actions input {
-        width: 100%;
-      }
     }
   </style>
 </head>
-<body class="app-locked">
+<body>
   <div class="grain"></div>
-  <section class="lock-screen" id="lock-screen" aria-hidden="false">
-    <div class="lock-card">
-      <p class="eyebrow">Private Space</p>
-      <h2>For Blessing Only</h2>
-      <p>Enter your PIN to open your love notes.</p>
-      <div class="lock-actions">
-        <input id="pin-input" type="password" inputmode="text" maxlength="40" placeholder="Enter PIN" />
-        <button id="unlock-btn" type="button">Unlock</button>
-      </div>
-      <p class="lock-tip" id="lock-tip">Tip: set your preferred PIN in the script.</p>
-    </div>
-  </section>
 
   <main class="page">
     <section class="hero">
@@ -761,7 +664,6 @@
       </div>
       <div class="share-actions">
         <button type="button" id="install-app-btn" class="ghost-btn">Install App</button>
-        <button type="button" id="lock-again-btn" class="ghost-btn">Lock Again</button>
       </div>
       <p class="install-tip" id="install-tip"></p>
     </section>
@@ -780,10 +682,7 @@
 
   <script>
     const bestFriendName = "BLESSING";
-    const sitePin = "love you more";
-    const unlockDurationMs = 24 * 60 * 60 * 1000;
     const storageKeys = {
-      unlockUntil: "blessing_unlock_until",
       smileCount: "blessing_smile_count",
       dailyStart: "blessing_daily_start"
     };
@@ -936,11 +835,6 @@
     const quizResult = document.getElementById("quiz-result");
     const installAppBtn = document.getElementById("install-app-btn");
     const installTip = document.getElementById("install-tip");
-    const lockScreen = document.getElementById("lock-screen");
-    const pinInput = document.getElementById("pin-input");
-    const unlockBtn = document.getElementById("unlock-btn");
-    const lockTip = document.getElementById("lock-tip");
-    const lockAgainBtn = document.getElementById("lock-again-btn");
 
     function readStore(key) {
       try {
@@ -1205,41 +1099,6 @@
       launchConfettiFrom(smileBtn);
     }
 
-    function setAppLocked(shouldLock) {
-      document.body.classList.toggle("app-locked", shouldLock);
-      lockScreen.setAttribute("aria-hidden", String(!shouldLock));
-
-      if (shouldLock) {
-        pinInput.value = "";
-        pinInput.focus();
-      }
-    }
-
-    function unlockApp() {
-      const inputPin = pinInput.value.trim();
-      if (inputPin.replace(/\s+/g, " ").toLowerCase() === sitePin.replace(/\s+/g, " ").toLowerCase()) {
-        writeStore(storageKeys.unlockUntil, String(Date.now() + unlockDurationMs));
-        lockTip.textContent = "Unlocked. Welcome, Blessing.";
-        setAppLocked(false);
-        return;
-      }
-
-      lockTip.textContent = "Wrong PIN. Try again, my love.";
-      pinInput.value = "";
-      pinInput.focus();
-    }
-
-    function lockAgain() {
-      writeStore(storageKeys.unlockUntil, "0");
-      lockTip.textContent = "Enter PIN to unlock your love notes.";
-      setAppLocked(true);
-    }
-
-    function initializeLockState() {
-      const unlockUntil = Number(readStore(storageKeys.unlockUntil) || "0");
-      setAppLocked(!(unlockUntil > Date.now()));
-    }
-
     function updateInstallTip(message) {
       installTip.textContent = message;
     }
@@ -1328,11 +1187,6 @@
     quizSubmitBtn.addEventListener("click", showQuizResult);
     quizResetBtn.addEventListener("click", resetQuiz);
     installAppBtn.addEventListener("click", handleInstallClick);
-    unlockBtn.addEventListener("click", unlockApp);
-    pinInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") unlockApp();
-    });
-    lockAgainBtn.addEventListener("click", lockAgain);
 
     renderCards();
     renderVoiceButtons();
@@ -1342,7 +1196,6 @@
     renderSmileCount();
     animateCardsIn();
     updateClockPill();
-    initializeLockState();
     initializeInstallPrompt();
     registerServiceWorker();
     setInterval(updateClockPill, 60000);
